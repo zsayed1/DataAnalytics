@@ -1,21 +1,21 @@
 ##***Import Data***
 
-##Loading Data with read.table command 
+## Loading Data with read.table command 
 >crime.data<-read.table("C:\\Users\\Zeshan\\Documents\\AnalyticsProject\\crime.data.txt",header=TRUE)
 
-##Checking the structure of Data with str and summary
+## Checking the structure of Data with str and summary
 >str(crime.data)
 >summary(crime.data)
 
-##Checking the head of data
+## Checking the head of data
 >head(crime.data)
 
-##***Data Cleaning***
+## ***Data Cleaning***
 
-Removing duplicate values with duplicated fucntion
+## Removing duplicate values with duplicated fucntion
 > crime.data <- subset(crime.data, !duplicated(crime.data$Case.Description))
 
-##Removing Null values from the data
+## Removing Null values from the data
 >crime.data <- subset(crime.data,!is.na(crime.data$Ward))
 >crime.data <- subset(crime.data,!is.na(crime.data$Loaction.Description))
 >crime.data <- subset(crime.data, !is.na(crime.data$Block))
@@ -24,43 +24,43 @@ Removing duplicate values with duplicated fucntion
 >crime.data <- subset(crime.data, !is.na(crime.data$Case.Description))
 
 
-##Checking and then removing null vaues with specific which() fucntion
+## Checking and then removing null vaues with specific which() fucntion
 >crime.data[-which(is.na(crime.data$Location)), ]
 >crime.data <- crime.data[-which(is.na(crime.data$Location)), ]
 
-##Checking and removing imputed values due to data migration
+## Checking and removing imputed values due to data migration
 > crime.data <- crime.data[crime.data$Case.Description != "Case.Description#",]
 
-##Checking the head of the Date
+## Checking the head of the Date
 > head(crime.data$Date)
 
-##Changing the date to Date formatusing POSIXIT() funtion
+## Changing the date to Date formatusing POSIXIT() funtion
 >crime.data$date <- as.POSIXlt(crime.data$Date,format= "%m/%d/%Y %H:%M")
 
-##Import library Chron to sort time from Date
+## Import library Chron to sort time from Date
 >library(chron)
 
-##Taking time out of Date with the help of time fucntion
+## Taking time out of Date with the help of time fucntion
 crime.data$time<-times(format(crime.data$Date, "%H:%M:%S"))
 
 
 
-##Creating time tags for time series model
+## Creating time tags for time series model
 >time.tag <- chron(times= c("00:00:00", "06:00:00", "12:00:00", "18:00:00","23:59:00"))
 
-##Checking if time tag column has been created or not
+## Checking if time tag column has been created or not
 >table(crime.data$time.tag)
 
-##Spliting the time in to time tags with cut()
+## Spliting the time in to time tags with cut()
 >crime.data$time.tag <- cut(crime.data$time, breaks= time.tag,labels= c("00-06","06-12", "12-18", "18-00"), include.lowest=TRUE)
 
-##Recode the date variable by strping it from date and storing it to the date with specific format 
+## Recode the date variable by strping it from date and storing it to the date with specific format 
 >crime.data$date <- as.POSIXlt(strptime(crime.data$date,format= "%Y-%m-%d"))
 
 ##Creating days for time series analysis
 >crime.data$day <- weekdays(crime.data$date, abbreviate= TRUE)
 
-##Grouping similar values in Primary.Type and saving it to new column "crime"
+## Grouping similar values in Primary.Type and saving it to new column "crime"
 >crime.data$crime <- as.character(crime.data$Primary.Type)
 >crime.data$crime <- ifelse(crime.data$crime %in% c("CRIM SEXUAL ASSAULT","PROSTITUTION", "SEX OFFENSE"), "SEX", crime.data$crime)
 >crime.data$crime <- ifelse(crime.data$crime %in% c("MOTOR VEHICLE THEFT"),"MVT", crime.data$crime)
@@ -72,22 +72,22 @@ crime.data$time<-times(format(crime.data$Date, "%H:%M:%S"))
 >crime.data$crime <- ifelse(crime.data$crime %in% c("KIDNAPPING", "WEAPONS VIOLATION", "OFFENSE INVOLVING CHILDREN"), "VIO", crime.data$crime)
 
 
-##Checking crime columns
+## Checking crime columns
 >table(crime.data$crime)
 
-##Converting Arrest to binary form
+## Converting Arrest to binary form
 >crime.data$Arrest <- ifelse(as.character(crime.data$Arrest) == "Y", 1, 0)
 
 
-##***Visualizing***
+## ***Visualizing***
 
-##Importing ggplot library to create time series plot
+## Importing ggplot library to create time series plot
 >library(ggplot2)
 
-##To install any library not present 
+## To install any library not present 
 >utils:::menuInstallPkgs()
 
-##Plot count of crime
+## Plot count of crime
 >qplot(crime.data$time.tag, xlab="Time of day", main = "Crimes by time of day") + scale_y_continuous("Number of crimes")
 
 ##factor Day with 7 values of day
